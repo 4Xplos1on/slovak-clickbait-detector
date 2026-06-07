@@ -1,0 +1,41 @@
+# Model files (too large for git, ~500MB)
+best_model/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Prep files (not part of the project)
+01_slovakbert_setup.py
+PROJECT_BRIEF.md
+gemini_context_prompt.md
+headlines_raw.csv
+headlines_raw.xlsx
+
+# Old API filenames
+api.py
+KInIT-app.py

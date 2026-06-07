@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="sk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Detektor Clickbaitu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding-top: 12vh;
+            background: linear-gradient(135deg, #f5f7fa, #e4e9f0, #f5f7fa, #dfe6ed);
+            background-size: 400% 400%;
+            animation: gradientMove 12s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            height: fit-content;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #999;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: #111;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #333;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .skeleton {
+            display: none;
+            padding: 24px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .skeleton.visible {
+            display: block;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            background: #eee;
+            border-radius: 4px;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        .skeleton-line.short {
+            width: 40%;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-line.medium {
+            width: 65%;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .result {
+            display: none;
+            padding: 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+
+        .result.legit {
+            display: block;
+            background: #f0faf0;
+            border-color: #b5dbb5;
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        .result.clickbait {
+            display: block;
+            background: #fdf0f0;
+            border-color: #e8b4b4;
+            animation: slideInShake 0.6s ease forwards;
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInShake {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            40% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateX(-6px);
+            }
+
+            60% {
+                transform: translateX(6px);
+            }
+
+            70% {
+                transform: translateX(-4px);
+            }
+
+            80% {
+                transform: translateX(4px);
+            }
+
+            90% {
+                transform: translateX(-2px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .result-label {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .result.legit .result-label {
+            color: #1a7a1a;
+        }
+
+        .result.clickbait .result-label {
+            color: #b91c1c;
+        }
+
+        .result-confidence {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .result-headline {
+            font-size: 13px;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .footer {
+            color: #ccc;
+            font-size: 12px;
+            margin-top: 40px;
+        }
+
+        .footer a {
+            color: #999;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Detektor Clickbaitu</h1>
+        <p class="subtitle">Vlož slovenský titulok a zisti, či je clickbait.</p>
+
+        <div class="input-group">
+            <input type="text" id="headline-input" placeholder="Zadajte titulok..." />
+            <button id="check-btn" onclick="checkHeadline()">Skontrolovať</button>
+        </div>
+
+        <div class="skeleton" id="skeleton">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line medium"></div>
+        </div>
+
+        <div class="result" id="result-box">
+            <div class="result-label" id="result-label"></div>
+            <div class="result-confidence" id="result-confidence"></div>
+            <div class="result-headline" id="result-headline"></div>
+        </div>
+
+        <div class="footer">
+            Postavené na <a href="https://huggingface.co/gerulata/slovakbert">SlovakBERT</a>
+            (gerulata/slovakbert) | Vytvoril Richard Šimek
+        </div>
+    </div>
+
+    <script>
+        var input = document.getElementById("headline-input");
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                checkHeadline();
+            }
+        });
+
+        function animateCounter(element, target) {
+            var current = 0;
+            var step = target / 30;
+            var interval = setInterval(function () {
+                current = current + step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(interval);
+                }
+                element.textContent = "Istota: " + Math.round(current) + "%";
+            }, 20);
+        }
+
+        function checkHeadline() {
+            var headline = document.getElementById("headline-input").value.trim();
+            var resultBox = document.getElementById("result-box");
+            var skeleton = document.getElementById("skeleton");
+            var button = document.getElementById("check-btn");
+
+            resultBox.className = "result";
+            skeleton.className = "skeleton";
+
+            if (headline === "") { return; }
+
+            skeleton.className = "skeleton visible";
+            button.disabled = true;
+            button.textContent = "Kontrolujem...";
+
+            fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ headline: headline })
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    skeleton.className = "skeleton";
+
+                    var label = data.label;
+                    var confidence = Math.round(data.confidence * 100);
+
+                    document.getElementById("result-label").textContent = label;
+                    document.getElementById("result-headline").textContent = '"' + data.headline + '"';
+
+                    var confidenceElement = document.getElementById("result-confidence");
+                    animateCounter(confidenceElement, confidence);
+
+                    // force animation restart
+                    resultBox.offsetHeight;
+
+                    if (label === "CLICKBAIT") {
+                        resultBox.className = "result clickbait";
+                    } else {
+                        resultBox.className = "result legit";
+                    }
+
+                    document.getElementById("headline-input").value = "";
+                })
+                .catch(function (err) {
+                    skeleton.className = "skeleton";
+                    alert("Chyba: " + err.message);
+                })
+                .finally(function () {
+                    button.disabled = false;
+                    button.textContent = "Skontrolovat";
+                });
+        }
+    </script>
+</body>
+
+</html>
