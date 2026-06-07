@@ -19,11 +19,19 @@ Slovak is a low-resource language, so there is not much NLP work done for it com
 | Precision (clickbait) | 0.84 |
 | Recall (clickbait) | 0.89 |
 
-Tested on 90 held-out headlines (stratified split). Out of 10 wrong predictions, 3-4 are actually labeling mistakes, not model errors. So real accuracy is probably closer to 93-94%.
-
-Results vary slightly between training runs (F1 between 0.86 and 0.90) because the dataset is small. That is expected.
+Tested on 90 held-out headlines (stratified split). Results vary slightly between training runs (F1 between 0.86 and 0.90) because the dataset is small. That is expected.
 
 ![Confusion Matrix](screenshots/confusion_matrix.png)
+
+### Error analysis
+
+The model got 10 out of 90 test headlines wrong. But when I went through each one manually, I found that 3-4 of those "mistakes" were actually mislabeled in the dataset, not real model errors.
+
+For example, a headline like *"Premier Fico sa v Bratislave stretol so srbskym ministrom obrany Gasicom"* was labeled as clickbait (because it came from a tabloid site), but it is clearly a normal news headline. The model correctly called it legit.
+
+This is a side effect of how I labeled the data: the first pass was based on which site published the headline, not the headline itself. Some legit headlines from tabloid sites and some clickbaity headlines from quality outlets got the wrong label. I caught and fixed 31 of these during manual review, but a few slipped through into the test set.
+
+After accounting for these, the model's real accuracy is probably closer to 93-94%.
 
 ### It learns language patterns, not topics
 
