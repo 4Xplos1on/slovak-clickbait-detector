@@ -1,14 +1,14 @@
 # Slovak Clickbait Detector
 
-Binary classifier that detects clickbait in Slovak news headlines using a fine-tuned [SlovakBERT](https://huggingface.co/gerulata/slovakbert) model. Includes a FastAPI backend and a web demo.
+Classifies Slovak news headlines as clickbait or legitimate using a fine-tuned [SlovakBERT](https://huggingface.co/gerulata/slovakbert) model. The app runs on FastAPI with a simple web interface.
 
 ![App demo](screenshots/app_legit.png)
 
-## Why this exists
+## Why I built this
 
-There is no publicly available clickbait detection dataset for Slovak. This project creates one from scratch (447 manually reviewed headlines from 6 Slovak news sources) and fine-tunes SlovakBERT to classify headlines as legitimate news or clickbait.
+There is no public clickbait dataset for Slovak. I scraped 447 headlines from 6 Slovak news sites, manually reviewed every single one, and used them to fine-tune SlovakBERT for binary classification.
 
-This connects to broader work on disinformation detection in low-resource languages, an area actively researched at [KInIT](https://kinit.sk) (vera.ai, DisAI).
+Slovak is a low-resource language, so there is not much NLP work done for it compared to English. This project ties into work being done at [KInIT](https://kinit.sk) on disinformation detection (vera.ai, DisAI).
 
 ## Results
 
@@ -19,67 +19,67 @@ This connects to broader work on disinformation detection in low-resource langua
 | Precision (clickbait) | 0.84 |
 | Recall (clickbait) | 0.89 |
 
-Evaluated on a held-out test set of 90 headlines (stratified split). Manual review of the 10 misclassified headlines showed that 3-4 were labeling errors rather than model mistakes, putting effective accuracy closer to 93-94%.
+Tested on 90 held-out headlines (stratified split). Out of 10 wrong predictions, 3-4 are actually labeling mistakes, not model errors. So real accuracy is probably closer to 93-94%.
 
-Variance between training runs (F1 0.86-0.90) is expected given the small dataset.
+Results vary slightly between training runs (F1 between 0.86 and 0.90) because the dataset is small. That is expected.
 
 ![Confusion Matrix](screenshots/confusion_matrix.png)
 
-### The model learns language patterns, not topics
+### It learns language patterns, not topics
 
-The same political topic gets classified differently depending on how it's phrased:
+Same political topic, different phrasing, different result:
 
 | Headline | Prediction | Confidence |
 |----------|------------|------------|
 | *Fico oznamil nove opatrenia proti inflacii* | LEGIT | 89% |
 | *Fico oznamil nove opatrenia proti inflacii. Tento krok zmeni zivoty tisicov Slovakov* | CLICKBAIT | 89% |
 
-Adding sensationalist language ("this step will change the lives of thousands of Slovaks") flips the prediction. This confirms the model picked up on clickbait writing style, not subject matter.
+Adding "this step will change the lives of thousands of Slovaks" flips it from legit to clickbait. The model learned to detect clickbait writing style, not just certain topics.
 
 ![App - Clickbait result](screenshots/app_clickbait.png)
 
 ## Dataset
 
-**447 headlines** scraped from 6 Slovak news websites using `requests` + `BeautifulSoup`, then manually reviewed.
+447 headlines scraped from 6 Slovak news websites using `requests` + `BeautifulSoup`, then manually reviewed one by one.
 
-Sources (clickbait): cas.sk, topky.sk
+Clickbait sources: cas.sk, topky.sk
 
-Sources (legitimate): dennikn.sk, pravda.sk, aktuality.sk, tasr.sk
+Legitimate sources: dennikn.sk, pravda.sk, aktuality.sk, tasr.sk
 
-**Labeling process:**
+How I labeled them:
 
-1. Pre-labeled by source (tabloid sites = clickbait, quality outlets = legit)
-2. All 447 headlines manually reviewed
-3. 31 labels corrected where the source-based label was wrong
-4. 18 truncated headlines removed
+1. First pass: labeled by source (tabloid = clickbait, quality outlet = legit)
+2. Went through all 447 headlines manually
+3. Corrected 31 labels where the source-based label was wrong
+4. Removed 18 truncated headlines (ones ending with "...")
 
-Final distribution: 178 clickbait, 269 legitimate. Class imbalance handled with weighted cross-entropy loss during training.
+Final split: 178 clickbait, 269 legitimate. I used weighted cross-entropy loss during training to handle the imbalance.
 
-The dataset is included as [`headlines_clean.csv`](headlines_clean.csv).
+The full dataset is in [`headlines_clean.csv`](headlines_clean.csv).
 
 ## Model
 
-**Base model:** [gerulata/slovakbert](https://huggingface.co/gerulata/slovakbert), a BERT-based transformer pre-trained on ~20 GB of Slovak text, developed by Gerulata/KInIT.
+**Base model:** [gerulata/slovakbert](https://huggingface.co/gerulata/slovakbert). BERT-based transformer pre-trained on ~20 GB of Slovak text, made by Gerulata/KInIT.
 
-**Fine-tuning details:**
+**Fine-tuning setup:**
 
-- Task: binary sequence classification
-- Epochs: 5 (best model selected by validation F1, typically epoch 2-4)
+- Binary classification (clickbait vs. legit)
+- 5 epochs, best model picked by validation F1 (usually epoch 2-4)
 - Batch size: 16, learning rate: 2e-5, weight decay: 0.01
-- Max token length: 64 (sufficient for headlines)
+- Max token length: 64 (headlines are short, this is more than enough)
 - Custom `WeightedTrainer` with class-weighted `CrossEntropyLoss`
-- Trained on Google Colab (T4 GPU), takes ~2 minutes
+- Trained on Google Colab with a T4 GPU, takes about 2 minutes
 
-The training notebook is in [`notebooks/`](notebooks/) for full reproducibility.
+The full training notebook is in [`notebooks/`](notebooks/).
 
 ## Running locally
 
-### Requirements
+**You need:**
 
 - Python 3.9+
-- The fine-tuned model files (not included in the repo due to size, ~500 MB)
+- The fine-tuned model files (not in the repo because they are ~500 MB)
 
-### Setup
+**Setup:**
 
 ```bash
 git clone https://github.com/4Xplos1on/slovak-clickbait-detector.git
@@ -87,15 +87,15 @@ cd slovak-clickbait-detector
 
 pip install -r requirements.txt
 
-# Place your fine-tuned model in best_model/
-# (train using the notebook in notebooks/, or contact me)
+# Put the fine-tuned model in best_model/
+# (train it yourself using the notebook, or contact me)
 
 uvicorn app:app --reload
 ```
 
-Open `http://localhost:8000` in your browser.
+Then open `http://localhost:8000` in your browser.
 
-### API usage
+**API example:**
 
 ```bash
 curl -X POST http://localhost:8000/predict \
@@ -115,21 +115,21 @@ curl -X POST http://localhost:8000/predict \
 
 ```
 slovak-clickbait-detector/
-  app.py                  # FastAPI backend (model loading + /predict endpoint)
-  index.html              # Web frontend (Slovak UI)
+  app.py                  # FastAPI backend
+  index.html              # Web frontend (all in Slovak)
   requirements.txt        # Python dependencies
-  headlines_clean.csv     # Dataset (447 labeled headlines)
+  headlines_clean.csv     # The dataset (447 labeled headlines)
   notebooks/              # Training notebook from Google Colab
   screenshots/            # Demo screenshots and confusion matrix
-  best_model/             # Fine-tuned model weights (not tracked, ~500 MB)
+  best_model/             # Fine-tuned model weights (not in git, ~500 MB)
 ```
 
 ## Limitations
 
-- **Small dataset.** 447 headlines demonstrates the approach but is not production-ready. A real system would need thousands of examples.
-- **Source-based pre-labeling.** Initial labels came from which site published the headline, not from the headline itself. Manual review caught the obvious mismatches, but some label noise likely remains.
-- **Slovak only.** Not tested on Czech or other related languages, despite mutual intelligibility.
-- **No diacritics robustness.** Headlines without proper Slovak diacritics (common in informal text) were not tested.
+- **Small dataset.** 447 headlines is enough to show the idea works, but not enough for a real production system. You would need thousands.
+- **Labeling noise.** Initial labels came from which site published the headline. I reviewed all of them manually, but some wrong labels probably still slipped through.
+- **Slovak only.** Not tested on Czech or other similar languages.
+- **No diacritics handling.** Did not test what happens with headlines that are missing diacritics (which is common in informal Slovak text).
 
 ## Acknowledgments
 
