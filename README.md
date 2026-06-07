@@ -85,23 +85,25 @@ The full training notebook is in [`notebooks/`](notebooks/).
 **You need:**
 
 - Python 3.9+
-- The fine-tuned model files (not in the repo because they are ~500 MB)
+- ~4 GB of disk space (the model is about 500 MB, PyTorch is about 2 GB)
 
 **Setup:**
 
 ```bash
 git clone https://github.com/4Xplos1on/slovak-clickbait-detector.git
 cd slovak-clickbait-detector
-
 pip install -r requirements.txt
+```
 
-# Put the fine-tuned model in best_model/
-# (train it yourself using the notebook, or contact me)
+Download the fine-tuned model from [Google Drive](https://drive.google.com/drive/folders/11YiFrgsaFwWIy0VwSFc-ZCpk1IODcJT6?usp=sharing) and put the contents into a folder called `best_model/` in the project root.
 
+Then run:
+
+```bash
 uvicorn app:app --reload
 ```
 
-Then open `http://localhost:8000` in your browser.
+Open `http://localhost:8000` in your browser.
 
 **API example:**
 
