@@ -92,7 +92,7 @@ The full training notebook is in [`notebooks/`](notebooks/).
 ```bash
 git clone https://github.com/4Xplos1on/slovak-clickbait-detector.git
 cd slovak-clickbait-detector
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 Download the fine-tuned model from [Google Drive](https://drive.google.com/drive/folders/11YiFrgsaFwWIy0VwSFc-ZCpk1IODcJT6?usp=sharing) and put the contents into a folder called `best_model/` in the project root.
