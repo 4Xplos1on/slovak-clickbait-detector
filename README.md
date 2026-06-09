@@ -93,7 +93,7 @@ The second headline in each pair uses sensational framing, but the model still c
 
 **What works well:** short factual headlines (99% confidence), question-style headlines that are genuinely neutral, and headlines that contain well-known clickbait phrases from the training data. The model also correctly handles legit headlines that sound surprising, like *"Vedci z SAV objavili novy druh jaskynneho chrobaka na Slovensku"* (LEGIT, 98%).
 
-**Why this happens:** The model was trained on 447 headlines from 6 specific websites. It learned the clickbait patterns that appear on cas.sk and topky.sk, but it has not seen enough variety to generalize to all forms of clickbait. This is the main limitation of a small dataset.
+**Why this happens:** The model was trained on only 178 clickbait headlines. It learned the specific phrases and patterns that appeared in those examples, but it has not seen enough variety to generalize to all forms of clickbait.
 
 ## Dataset
 
