@@ -31,7 +31,7 @@ For example, a headline like *"Premier Fico sa v Bratislave stretol so srbskym m
 
 This is a side effect of how I labeled the data: the first pass was based on which site published the headline, not the headline itself. Some legit headlines from tabloid sites and some clickbaity headlines from quality outlets got the wrong label. I caught and fixed 31 of these during manual review, but a few slipped through into the test set.
 
-After accounting for these, the model's real accuracy is probably closer to 93-94%.
+After accounting for these, the model's real accuracy is probably closer to 92-93%.
 
 ### It learns language patterns, not topics
 
@@ -42,7 +42,7 @@ Same political topic, different phrasing, different result:
 | *Fico oznamil nove opatrenia proti inflacii* | LEGIT | 89% |
 | *Fico oznamil nove opatrenia proti inflacii. Tento krok zmeni zivoty tisicov Slovakov* | CLICKBAIT | 89% |
 
-Adding "this step will change the lives of thousands of Slovaks" flips it from legit to clickbait. The model learned to detect clickbait writing style, not just certain topics.
+Adding "this step will change the lives of thousands of Slovaks" flips it from legit to clickbait. The model picks up on clickbait phrasing, not just certain topics.
 
 ![App - Clickbait result](screenshots/app_clickbait.png)
 
@@ -50,7 +50,7 @@ Adding "this step will change the lives of thousands of Slovaks" flips it from l
 
 I tested the model on 28 new headlines that I wrote myself, designed to test specific edge cases. These headlines were not in the training data. Here is what I found.
 
-**Missing diacritics break detection.** Slovak text online often appears without diacritics (no s, c, z, etc.). SlovakBERT was trained on properly written Slovak, so when diacritics are missing, the tokens become unfamiliar to the model.
+**Missing diacritics break detection.** Slovak text online often appears without diacritics (no š, č, ž, ť, etc.). SlovakBERT was trained on properly written Slovak, so when diacritics are missing, the tokens get split differently and the model does not recognize the patterns it learned during training.
 
 | Headline | Prediction | Confidence | Correct? |
 |----------|------------|------------|----------|
@@ -67,7 +67,7 @@ Both of these are obvious clickbait. The first one at least has low confidence (
 | *Slovenska nemocnica odmietla pacienta a ten zomrel pred vchodom* | LEGIT | 99% |
 | *Ucitelia su na pokraji zrutenia a nikoho to nezaujima* | LEGIT | 98% |
 
-These are all written in tabloid style, but the model does not flag them. It has no concept of emotional manipulation as a category. It only knows the specific words and phrases it saw during training.
+These headlines use emotional framing that is common in tabloid media. Some of them could arguably appear in quality outlets too, but the style is typical of clickbait. Either way, the model shows no sensitivity to emotional tone at all. It only reacts to the specific words and phrases it saw during training.
 
 **It catches some clickbait phrases but not others.** Even within the "subtle clickbait" category, results were inconsistent:
 
@@ -93,7 +93,7 @@ The second headline in each pair uses sensational framing, but the model still c
 
 **What works well:** short factual headlines (99% confidence), question-style headlines that are genuinely neutral, and headlines that contain well-known clickbait phrases from the training data. The model also correctly handles legit headlines that sound surprising, like *"Vedci z SAV objavili novy druh jaskynneho chrobaka na Slovensku"* (LEGIT, 98%).
 
-**Why this happens:** The model was trained on only 178 clickbait headlines. It learned the specific phrases and patterns that appeared in those examples, but it has not seen enough variety to generalize to all forms of clickbait.
+**Why this happens:** The model was trained on only 178 clickbait headlines. It learned the specific phrases and patterns that appeared in those examples, but it has not seen enough variety to generalize to all forms of clickbait. This is the main limitation of a small dataset.
 
 ## Dataset
 
@@ -188,7 +188,7 @@ slovak-clickbait-detector/
 - **Test cross-lingual transfer** from Czech clickbait data, since Czech and Slovak are closely related and share many clickbait patterns.
 - **Add explainability** using attention visualization or occlusion-based methods to show which words the model focuses on when making predictions.
 - **Handle missing diacritics** by adding a diacritics restoration step before classification, or by including headlines without diacritics in the training data.
-- **Test on the skLEP benchmark** to compare against other Slovak NLP tasks.
+- **Benchmark on standardized Slovak NLP tasks** from skLEP (sentiment analysis, semantic similarity) to better understand how SlovakBERT fine-tuning performs across different text classification problems.
 
 ## Acknowledgments
 
