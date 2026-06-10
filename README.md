@@ -184,7 +184,7 @@ slovak-clickbait-detector/
 
 ## Future work
 
-- **Expand the dataset** using LLM-generated synthetic headlines to increase variety, following approaches from recent research on [synthetic data for low-resource languages](https://kinit.sk/publication/a-rigorous-evaluation-of-llm-data-generation-strategies-for-low-resource-languages/) (Cegin et al., EMNLP 2025).
+- **Expand the dataset with targeted synthetic data** The edge case analysis above shows specific gaps: emotional manipulation without clickbait vocabulary, sensational framing, and missing-diacritics variants. Instead of generating random clickbait headlines, the next step would be generating synthetic examples that specifically target these failure categories, then manually validating them before adding to the training set. Cegin et al. (EMNLP 2025) showed that LLM-generated data can help for low-resource languages like Slovak, but the generation strategy matters more than volume. Naive generation tends to produce repetitive samples that do not actually improve generalization.
 - **Test cross-lingual transfer** from Czech clickbait data, since Czech and Slovak are closely related and share many clickbait patterns.
 - **Add explainability** using attention visualization or occlusion-based methods to show which words the model focuses on when making predictions.
 - **Handle missing diacritics** by adding a diacritics restoration step before classification, or by including headlines without diacritics in the training data.
